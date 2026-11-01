@@ -32,8 +32,15 @@ button:hover{border-color:var(--teal)}
 button.primary{background:var(--teal);color:var(--tealtx);border-color:var(--teal);font-weight:600}
 button.danger{color:var(--red)}
 button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--tag);outline-offset:1px}
-.add{display:grid;grid-template-columns:70px 2fr 1fr 1fr auto;gap:8px;align-items:end}
-.row{display:grid;grid-template-columns:70px 2fr 1fr 1.2fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.add{display:grid;grid-template-columns:1.3fr 2fr 1fr 1fr auto;gap:8px;align-items:end}
+.row{display:grid;grid-template-columns:110px 2fr 1fr 1.2fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.pic{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.thumb{width:64px;height:64px;border-radius:8px;border:1px solid var(--line);display:grid;place-items:center;font-size:1.8rem;overflow:hidden;background:var(--bg)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.pic label{display:inline-block;position:relative;margin:0;font-size:.8rem;color:var(--teal);font-weight:600;cursor:pointer;text-decoration:underline}
+.pic label:focus-within{outline:3px solid var(--tag)}
+.pic input{position:absolute;opacity:0;width:1px;height:1px}
+.pic button{padding:0;border:0;background:none;color:var(--red);font-size:.8rem;text-decoration:underline}
 .stockcell{display:flex;gap:6px;align-items:center}
 .stockcell input{min-width:60px}
 .acts{display:flex;gap:6px}
@@ -41,7 +48,8 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(-
 .badge.out{color:var(--red)}.badge.low{color:var(--amber)}
 .head{color:var(--muted);font-size:.85rem}
 @media (max-width:700px){
-  .add,.row{grid-template-columns:70px 1fr 1fr}
+  .add{grid-template-columns:1fr 1fr}
+  .row{grid-template-columns:110px 1fr 1fr}
   .add button,.row .acts{grid-column:1/-1}
   .head{display:none}
 }
@@ -95,7 +103,7 @@ select:focus-visible{outline:3px solid var(--tag);outline-offset:1px}
   <section class="card" aria-labelledby="ah">
     <h2 id="ah">Add a new item</h2>
     <div class="add" role="group" aria-label="New item">
-      <div><label for="ne">Emoji</label><input id="ne" value="📦" maxlength="4"></div>
+      <div><label for="nf">Photo (optional)</label><input id="nf" type="file" accept="image/*"></div>
       <div><label for="nn">Name</label><input id="nn" placeholder="e.g. Highlighter"></div>
       <div><label for="np">Price</label><input id="np" type="number" min="0" step="0.01" placeholder="0.00"></div>
       <div><label for="ns">Starting stock</label><input id="ns" type="number" min="0" step="1" placeholder="0"></div>
@@ -106,7 +114,7 @@ select:focus-visible{outline:3px solid var(--tag);outline-offset:1px}
 
   <section class="card" aria-labelledby="ih">
     <h2 id="ih">Inventory</h2>
-    <div class="row head" aria-hidden="true"><span>Emoji</span><span>Name</span><span>Price</span><span>Stock</span><span></span></div>
+    <div class="row head" aria-hidden="true"><span>Photo</span><span>Name</span><span>Price</span><span>Stock</span><span></span></div>
     <div id="list"></div>
     <div class="foot">
       <span id="total" class="head"></span>
@@ -136,7 +144,9 @@ function note(t){ $("msg").textContent=t; setTimeout(()=>{ if($("msg").textConte
 function badge(s){ return s<=0 ? '<div class="badge out">Out of stock</div>' : s<=5 ? '<div class="badge low">Low stock</div>' : '<div class="badge"></div>'; }
 function render(){
   $("list").innerHTML = products.length ? products.map(p=>`<div class="row" data-id="${p.id}">
-    <input data-f="em" value="${esc(p.em||"📦")}" maxlength="4" aria-label="Emoji for ${esc(p.name)}">
+    <div class="pic"><div class="thumb">${p.img ? `<img src="${esc(p.img)}" alt="">` : esc(p.em||"📦")}</div>
+      <label>${p.img ? "Change photo" : "Add photo"}<input type="file" accept="image/*" data-pic aria-label="Photo for ${esc(p.name)}"></label>
+      ${p.img ? '<button data-rmpic="1">Remove</button>' : ""}</div>
     <input data-f="name" value="${esc(p.name)}" aria-label="Name">
     <input data-f="price" type="number" min="0" step="0.01" value="${p.price}" aria-label="Price of ${esc(p.name)}">
     <div><div class="stockcell"><input data-f="stock" type="number" min="0" step="1" value="${p.stock}" aria-label="Stock of ${esc(p.name)}">
@@ -159,13 +169,44 @@ $("list").addEventListener("click", e=>{
   const b = e.target.closest("button"), row = e.target.closest(".row"); if(!b||!row) return;
   const p = products.find(x=>x.id===+row.dataset.id);
   if (b.dataset.add){ p.stock += +b.dataset.add; save(); render(); note("Stock updated."); }
+  else if (b.dataset.rmpic){ delete p.img; save(); render(); note("Photo removed."); }
   else if (b.dataset.del && confirm("Delete " + p.name + "?")){ products = products.filter(x=>x!==p); save(); render(); note("Item deleted."); }
 });
-$("add").onclick = () => {
+// Shrinks a picked photo to a small JPEG so it fits in browser storage.
+function toDataUrl(file, max = 320){
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onerror = reject;
+    r.onload = () => {
+      const im = new Image();
+      im.onerror = reject;
+      im.onload = () => {
+        const s = Math.min(1, max / Math.max(im.width, im.height));
+        const c = document.createElement("canvas");
+        c.width = Math.round(im.width * s); c.height = Math.round(im.height * s);
+        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+        resolve(c.toDataURL("image/jpeg", 0.8));
+      };
+      im.src = r.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
+$("list").addEventListener("change", async e => {
+  if (!e.target.matches("[data-pic]")) return;
+  const row = e.target.closest(".row"), file = e.target.files[0]; if (!row || !file) return;
+  const p = products.find(x => x.id === +row.dataset.id);
+  try { p.img = await toDataUrl(file); save(); render(); note("Photo saved."); }
+  catch(err){ note("That file could not be used as a photo."); }
+});
+$("add").onclick = async () => {
   const name=$("nn").value.trim(), price=parseFloat($("np").value), stock=parseInt($("ns").value,10);
   if(!name || isNaN(price) || price<0 || isNaN(stock) || stock<0){ note("Enter a name, a price, and a starting stock."); return; }
-  products.push({id:Date.now(),name,price,stock,em:$("ne").value.trim()||"📦"});
-  save(); $("nn").value=$("np").value=$("ns").value=""; $("ne").value="📦"; render(); note(name + " added.");
+  const item = {id:Date.now(),name,price,stock,em:"📦"};
+  const file = $("nf").files[0];
+  if (file){ try { item.img = await toDataUrl(file); } catch(err){ note("Photo could not be used. Item added without it."); } }
+  products.push(item);
+  save(); $("nn").value=$("np").value=$("ns").value=$("nf").value=""; render(); note(name + " added.");
 };
 $("reset").onclick = () => { if(confirm("Replace all items with the sample items?")){ products = SEED.map(p=>({...p})); save(); render(); note("Reset done."); } };
 render();

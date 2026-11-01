@@ -27,6 +27,7 @@ h2{margin:0 0 12px;font-size:1.2rem}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
 .prod{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:4px}
 .prod .em{font-size:1.8rem}
+.pimg{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;background:var(--line)}
 .prod b{font-weight:600}
 .prod .meta{color:var(--muted);font-size:.85rem}
 .price{font-weight:700;font-size:1.15rem}
@@ -148,7 +149,7 @@ function discLabel(){ return discount.type==="percent" ? discount.value+"% off" 
 function renderProducts(){
   $("products").innerHTML = products.map(p=>{
     const q = bundle[p.id]||0, left = p.stock-q;
-    return `<div class="prod"><span class="em" aria-hidden="true">${p.em||"📦"}</span><b>${esc(p.name)}</b>
+    return `<div class="prod">${p.img ? `<img class="pimg" src="${esc(p.img)}" alt="" loading="lazy">` : `<span class="em" aria-hidden="true">${p.em||"📦"}</span>`}<b>${esc(p.name)}</b>
       <span class="price">${fmt(p.price)}</span>
       <span class="meta">${left>0 ? left+" in stock" : "Out of stock"}</span>
       <button data-add="${p.id}" ${left<=0?"disabled":""}>Add to bundle</button></div>`;
