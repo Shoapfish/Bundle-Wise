@@ -1,0 +1,15 @@
+{
+  "name": "Bundle Wise",
+  "short_name": "Bundle Wise",
+  "description": "Build product bundles, apply discounts, and see the final price.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f5f8",
+  "theme_color": "#12263a",
+  "icons": [
+    { "src": "images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "images/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
