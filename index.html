@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bundle Wise – Retail Product Bundle Planner</title>
 <link rel="icon" type="image/jpeg" href="images/8ac7af4e-af87-4d08-bcc4-0b827c78cb1b.jfif">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#12263a">
+<link rel="apple-touch-icon" href="images/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -190,6 +193,8 @@ window.addEventListener("storage", e=>{
   if (e.key==="bw_products"){ products = load("bw_products", SEED); for (const id in bundle){ const p = products.find(x=>x.id==id); if(!p) delete bundle[id]; else bundle[id]=Math.min(bundle[id],p.stock); if(bundle[id]<=0) delete bundle[id]; } renderAll(); }
 });
 renderAll();
+
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </body>
 </html>
