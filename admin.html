@@ -45,6 +45,10 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(-
 .msg{font-size:.9rem;color:var(--teal);min-height:1.3em;margin-top:8px}
 .foot{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:12px}
 [hidden]{display:none!important}
+select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%}
+select:focus-visible{outline:3px solid var(--tag);outline-offset:1px}
+.disc{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end}
+@media (max-width:560px){.disc{grid-template-columns:1fr 1fr}.disc button{grid-column:1/-1}}
 #panel{display:flex;flex-direction:column;gap:16px}
 .login{max-width:380px;margin:24px auto 0;width:100%}
 .login .go{display:flex;gap:8px;align-items:end}
@@ -74,6 +78,17 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(-
   </section>
 
   <div id="panel" hidden>
+  <section class="card" aria-labelledby="dh">
+    <h2 id="dh">Bundle discount</h2>
+    <div class="disc" role="group" aria-label="Bundle discount">
+      <div><label for="dtype">Discount type</label>
+        <select id="dtype"><option value="percent">Percent (%)</option><option value="fixed">Fixed amount</option></select></div>
+      <div><label for="dval">Discount value</label><input id="dval" type="number" min="0" step="0.01" value="0"></div>
+      <button class="primary" id="dsave">Save discount</button>
+    </div>
+    <div class="msg" id="dmsg" role="status"></div>
+  </section>
+
   <section class="card" aria-labelledby="ah">
     <h2 id="ah">Add a new item</h2>
     <div class="add" role="group" aria-label="New item">
@@ -151,6 +166,21 @@ $("add").onclick = () => {
 };
 $("reset").onclick = () => { if(confirm("Replace all items with the sample items?")){ products = SEED.map(p=>({...p})); save(); render(); note("Reset done."); } };
 render();
+
+// Bundle discount: saved here, read by the planner page.
+const DKEY = "bw_discount";
+let disc = {type:"percent", value:0};
+try { disc = JSON.parse(localStorage.getItem(DKEY)) || disc; } catch(e){}
+$("dtype").value = disc.type; $("dval").value = disc.value;
+function dnote(t){ $("dmsg").textContent = t; setTimeout(()=>{ if($("dmsg").textContent===t) $("dmsg").textContent=""; },3000); }
+$("dsave").onclick = () => {
+  const type = $("dtype").value, value = parseFloat($("dval").value);
+  if (isNaN(value) || value < 0){ dnote("Enter a discount of 0 or more."); return; }
+  if (type==="percent" && value > 100){ dnote("A percent discount can't be more than 100."); return; }
+  disc = {type, value};
+  try { localStorage.setItem(DKEY, JSON.stringify(disc)); dnote("Discount saved: " + (type==="percent" ? value + "% off" : "₱" + value + " off")); }
+  catch(e){ dnote("Could not save in this browser."); }
+};
 
 // Password gate: only a SHA-256 hash is stored here, never the password itself.
 const HASH = "b9b1d7b6f7769919ea24c2200211b7b411b4a05e045496bf067930e1c56ef446";

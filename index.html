@@ -74,17 +74,10 @@ label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:3px}
       <input id="bn" placeholder="e.g. Back-to-school pack" style="margin-bottom:12px">
       <ul class="items" id="items"></ul>
 
-      <div class="row">
-        <div><label for="dt">Discount type</label>
-          <select id="dt"><option value="percent">Percent (%)</option><option value="fixed">Fixed amount</option></select></div>
-        <div><label for="dv">Discount</label><input id="dv" type="number" min="0" step="0.01" value="0"></div>
-      </div>
-      <div class="actions" id="presets" aria-label="Quick discounts"></div>
-
       <div style="margin-top:14px">
         <div class="sum"><span>Items</span><span id="sCount">0</span></div>
         <div class="sum"><span>Subtotal</span><span id="sSub">0.00</span></div>
-        <div class="sum save"><span>Discount</span><span id="sDisc">-0.00</span></div>
+        <div class="sum save"><span id="sDiscLabel">Discount</span><span id="sDisc">-0.00</span></div>
       </div>
       <div class="tag">
         <div><small>Final bundle price</small><small id="sSave"></small></div>
@@ -107,6 +100,7 @@ label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:3px}
 
 <script>
 const CUR = "₱"; // change to "$", "€", etc.
+const DEFAULT_DISCOUNT = {type:"percent", value:0}; // used when the admin has not set a discount
 const fmt = n => CUR + n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const $ = id => document.getElementById(id);
@@ -125,7 +119,7 @@ const store = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } cat
 let products = load("bw_products", SEED);
 let saved = load("bw_saved", []);
 let bundle = {};            // productId -> qty
-let discount = {type:"percent", value:0};
+let discount = load("bw_discount", DEFAULT_DISCOUNT); // set from the admin page
 
 function totals(){
   let sub = 0, count = 0;
@@ -155,6 +149,7 @@ function renderBundle(){
   const t = totals();
   $("sCount").textContent = t.count;
   $("sSub").textContent = fmt(t.sub);
+  $("sDiscLabel").textContent = t.disc>0 ? "Bundle discount (" + discLabel() + ")" : "Bundle discount";
   $("sDisc").textContent = "-" + fmt(t.disc);
   $("sFinal").textContent = fmt(t.final);
   $("sSave").textContent = t.disc>0 ? "You save " + fmt(t.disc) : "";
@@ -174,11 +169,8 @@ document.addEventListener("click", e=>{
   if (d.add || d.inc){ const id=+(d.add||d.inc), p=products.find(x=>x.id===id); if((bundle[id]||0)<p.stock) bundle[id]=(bundle[id]||0)+1; renderProducts(); renderBundle(); }
   else if (d.dec){ const id=+d.dec; bundle[id]=(bundle[id]||0)-1; if(bundle[id]<=0) delete bundle[id]; renderProducts(); renderBundle(); }
   else if (d.del){ saved.splice(+d.del,1); store("bw_saved",saved); renderSaved(); }
-  else if (d.preset){ discount={type:"percent",value:+d.preset}; $("dt").value="percent"; $("dv").value=d.preset; renderBundle(); }
 });
 
-$("presets").innerHTML = [5,10,15,20].map(n=>`<button data-preset="${n}">${n}% off</button>`).join("");
-$("dt").onchange = $("dv").oninput = () => { discount={type:$("dt").value,value:parseFloat($("dv").value)||0}; renderBundle(); };
 
 $("clear").onclick = () => { bundle={}; $("bn").value=""; renderAll(); };
 $("save").onclick = () => {
@@ -194,6 +186,7 @@ $("copy").onclick = async () => {
 };
 
 window.addEventListener("storage", e=>{
+  if (e.key==="bw_discount"){ discount = load("bw_discount", DEFAULT_DISCOUNT); renderBundle(); }
   if (e.key==="bw_products"){ products = load("bw_products", SEED); for (const id in bundle){ const p = products.find(x=>x.id==id); if(!p) delete bundle[id]; else bundle[id]=Math.min(bundle[id],p.stock); if(bundle[id]<=0) delete bundle[id]; } renderAll(); }
 });
 renderAll();
