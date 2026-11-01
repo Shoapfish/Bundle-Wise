@@ -57,6 +57,12 @@ label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:3px}
 .saved li{padding:8px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;align-items:center}
 .saved small{color:var(--muted);display:block}
 .msg{font-size:.85rem;color:var(--teal);min-height:1.2em;margin-top:6px}
+.getapp{max-width:1120px;margin:8px auto 0;padding:0 20px}
+.appbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.appbar small{display:block;color:var(--muted)}
+.dl{background:var(--teal);color:var(--tealtx);font-weight:600;text-decoration:none;border-radius:8px;padding:8px 14px}
+.dl:focus-visible{outline:3px solid var(--tag);outline-offset:2px}
+@media (display-mode:standalone){.getapp{display:none}}
 </style>
 </head>
 <body>
@@ -64,6 +70,12 @@ label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:3px}
   <h1><img class="logo" src="images/8ac7af4e-af87-4d08-bcc4-0b827c78cb1b.jfif" alt="Bundle Wise" width="96" height="96"></h1>
   <p>Pick products, build a bundle, set a discount, and see the final price. <a href="admin.html" style="color:var(--teal);font-weight:600">Admin</a></p>
 </header>
+<div class="getapp">
+  <div class="card appbar">
+    <div>Use Bundle Wise as an Android app.<small>Android only. When asked, allow installs from your browser or Drive.</small></div>
+    <a class="dl" href="https://drive.google.com/uc?export=download&amp;id=168XSZnzBXW-RWp0Nw8d6ZiITKT2ShLC1" rel="noopener">Download for Android</a>
+  </div>
+</div>
 <main>
   <section class="card" aria-labelledby="ph">
     <h2 id="ph">Products</h2>
