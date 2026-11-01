@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bundle Wise – Admin</title>
+<link rel="icon" type="image/jpeg" href="images/8ac7af4e-af87-4d08-bcc4-0b827c78cb1b.jfif">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#12263a;--bg:#f2f5f8;--card:#fff;--line:#d9e0e7;--muted:#5b6b7a;--teal:#0e7c7b;--tealtx:#fff;--tag:#ffd84a;--red:#c8312a;--amber:#b86e00}
+@media (prefers-color-scheme:dark){:root{--ink:#e8eef4;--bg:#0f1b27;--card:#172636;--line:#2a3d50;--muted:#93a4b5;--teal:#2bb3b1;--tealtx:#07222a;--red:#ff7b72;--amber:#ffb84d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;letter-spacing:-.01em;margin:0}
+header{max-width:960px;margin:0 auto;padding:20px 20px 4px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+header h1{font-size:2rem;font-weight:800}
+header p{margin:2px 0 0;color:var(--muted)}
+.brand{display:flex;gap:14px;align-items:center}
+.logo{display:block;width:72px;height:72px;border-radius:12%;flex:none}
+a{color:var(--teal);font-weight:600}
+main{max-width:960px;margin:0 auto;padding:16px 20px 48px;display:flex;flex-direction:column;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+h2{font-size:1.2rem;margin-bottom:12px}
+label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:3px}
+input{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px}
+button:hover{border-color:var(--teal)}
+button.primary{background:var(--teal);color:var(--tealtx);border-color:var(--teal);font-weight:600}
+button.danger{color:var(--red)}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--tag);outline-offset:1px}
+.add{display:grid;grid-template-columns:70px 2fr 1fr 1fr auto;gap:8px;align-items:end}
+.row{display:grid;grid-template-columns:70px 2fr 1fr 1.2fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.stockcell{display:flex;gap:6px;align-items:center}
+.stockcell input{min-width:60px}
+.acts{display:flex;gap:6px}
+.badge{font-size:.8rem;font-weight:600;margin-top:2px;min-height:1.2em}
+.badge.out{color:var(--red)}.badge.low{color:var(--amber)}
+.head{color:var(--muted);font-size:.85rem}
+@media (max-width:700px){
+  .add,.row{grid-template-columns:70px 1fr 1fr}
+  .add button,.row .acts{grid-column:1/-1}
+  .head{display:none}
+}
+.msg{font-size:.9rem;color:var(--teal);min-height:1.3em;margin-top:8px}
+.foot{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:12px}
+[hidden]{display:none!important}
+#panel{display:flex;flex-direction:column;gap:16px}
+.login{max-width:380px;margin:24px auto 0;width:100%}
+.login .go{display:flex;gap:8px;align-items:end}
+.hr{display:flex;gap:12px;align-items:center}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img class="logo" src="images/8ac7af4e-af87-4d08-bcc4-0b827c78cb1b.jfif" alt="Bundle Wise logo" width="72" height="72">
+    <div>
+      <h1>Bundle Wise Admin</h1>
+      <p>Add new items and keep your stock up to date.</p>
+    </div>
+  </div>
+  <div class="hr"><a href="index.html">Back to the planner</a><button id="logout" hidden>Log out</button></div>
+</header>
+
+<main>
+  <section class="card login" id="login" aria-labelledby="lh">
+    <h2 id="lh">Admin login</h2>
+    <div class="go">
+      <div style="flex:1"><label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password"></div>
+      <button class="primary" id="go">Log in</button>
+    </div>
+    <div class="msg" id="lmsg" role="status" style="color:var(--red)"></div>
+  </section>
+
+  <div id="panel" hidden>
+  <section class="card" aria-labelledby="ah">
+    <h2 id="ah">Add a new item</h2>
+    <div class="add" role="group" aria-label="New item">
+      <div><label for="ne">Emoji</label><input id="ne" value="📦" maxlength="4"></div>
+      <div><label for="nn">Name</label><input id="nn" placeholder="e.g. Highlighter"></div>
+      <div><label for="np">Price</label><input id="np" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      <div><label for="ns">Starting stock</label><input id="ns" type="number" min="0" step="1" placeholder="0"></div>
+      <button class="primary" id="add">Add item</button>
+    </div>
+    <div class="msg" id="msg" role="status"></div>
+  </section>
+
+  <section class="card" aria-labelledby="ih">
+    <h2 id="ih">Inventory</h2>
+    <div class="row head" aria-hidden="true"><span>Emoji</span><span>Name</span><span>Price</span><span>Stock</span><span></span></div>
+    <div id="list"></div>
+    <div class="foot">
+      <span id="total" class="head"></span>
+      <button class="danger" id="reset">Reset to sample items</button>
+    </div>
+  </section>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const SEED = [
+  {id:1,name:"Notebook",price:45,stock:30,em:"📓"},
+  {id:2,name:"Ballpen set",price:60,stock:25,em:"🖊️"},
+  {id:3,name:"Backpack",price:850,stock:8,em:"🎒"},
+  {id:4,name:"Water bottle",price:220,stock:12,em:"🧴"},
+  {id:5,name:"Lunch box",price:180,stock:10,em:"🍱"},
+  {id:6,name:"Calculator",price:320,stock:6,em:"🧮"}
+];
+const KEY = "bw_products"; // same key the planner page reads
+let products;
+try { products = JSON.parse(localStorage.getItem(KEY)) || SEED; } catch(e){ products = SEED; }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(products)); } catch(e){ note("Could not save in this browser."); } };
+function note(t){ $("msg").textContent=t; setTimeout(()=>{ if($("msg").textContent===t) $("msg").textContent=""; },2500); }
+
+function badge(s){ return s<=0 ? '<div class="badge out">Out of stock</div>' : s<=5 ? '<div class="badge low">Low stock</div>' : '<div class="badge"></div>'; }
+function render(){
+  $("list").innerHTML = products.length ? products.map(p=>`<div class="row" data-id="${p.id}">
+    <input data-f="em" value="${esc(p.em||"📦")}" maxlength="4" aria-label="Emoji for ${esc(p.name)}">
+    <input data-f="name" value="${esc(p.name)}" aria-label="Name">
+    <input data-f="price" type="number" min="0" step="0.01" value="${p.price}" aria-label="Price of ${esc(p.name)}">
+    <div><div class="stockcell"><input data-f="stock" type="number" min="0" step="1" value="${p.stock}" aria-label="Stock of ${esc(p.name)}">
+      <button data-add="1" aria-label="Add 1 to ${esc(p.name)}">+1</button><button data-add="10" aria-label="Add 10 to ${esc(p.name)}">+10</button></div>${badge(p.stock)}</div>
+    <div class="acts"><button class="danger" data-del="1">Delete</button></div></div>`).join("")
+    : '<p class="head">No items yet. Add your first one above.</p>';
+  const units = products.reduce((s,p)=>s+p.stock,0);
+  $("total").textContent = products.length + " items, " + units + " units in stock";
+}
+
+$("list").addEventListener("change", e=>{
+  const row = e.target.closest(".row"), f = e.target.dataset.f; if(!row||!f) return;
+  const p = products.find(x=>x.id===+row.dataset.id); let v = e.target.value;
+  if (f==="price") v = Math.max(0, parseFloat(v)||0);
+  else if (f==="stock") v = Math.max(0, parseInt(v,10)||0);
+  else if (f==="name") v = v.trim() || p.name;
+  p[f] = v; save(); render(); note("Saved.");
+});
+$("list").addEventListener("click", e=>{
+  const b = e.target.closest("button"), row = e.target.closest(".row"); if(!b||!row) return;
+  const p = products.find(x=>x.id===+row.dataset.id);
+  if (b.dataset.add){ p.stock += +b.dataset.add; save(); render(); note("Stock updated."); }
+  else if (b.dataset.del && confirm("Delete " + p.name + "?")){ products = products.filter(x=>x!==p); save(); render(); note("Item deleted."); }
+});
+$("add").onclick = () => {
+  const name=$("nn").value.trim(), price=parseFloat($("np").value), stock=parseInt($("ns").value,10);
+  if(!name || isNaN(price) || price<0 || isNaN(stock) || stock<0){ note("Enter a name, a price, and a starting stock."); return; }
+  products.push({id:Date.now(),name,price,stock,em:$("ne").value.trim()||"📦"});
+  save(); $("nn").value=$("np").value=$("ns").value=""; $("ne").value="📦"; render(); note(name + " added.");
+};
+$("reset").onclick = () => { if(confirm("Replace all items with the sample items?")){ products = SEED.map(p=>({...p})); save(); render(); note("Reset done."); } };
+render();
+
+// Password gate: only a SHA-256 hash is stored here, never the password itself.
+const HASH = "b9b1d7b6f7769919ea24c2200211b7b411b4a05e045496bf067930e1c56ef446";
+const sha = async s => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)))].map(b=>b.toString(16).padStart(2,"0")).join("");
+function unlock(){ $("login").hidden = true; $("panel").hidden = false; $("logout").hidden = false; }
+try { if (sessionStorage.getItem("bw_admin")==="1") unlock(); } catch(e){}
+$("go").onclick = async () => {
+  try {
+    if (await sha($("pw").value.trim()) === HASH){ try { sessionStorage.setItem("bw_admin","1"); } catch(e){} unlock(); }
+    else { $("lmsg").textContent = "Wrong password. Try again."; $("pw").select(); }
+  } catch(e){ $("lmsg").textContent = "Login needs https or localhost. Open the deployed site."; }
+};
+$("pw").addEventListener("keydown", e => { if (e.key==="Enter") $("go").click(); });
+$("logout").onclick = () => { try { sessionStorage.removeItem("bw_admin"); } catch(e){} location.reload(); };
+</script>
+</body>
+</html>

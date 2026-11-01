@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bundle Wise – Retail Product Bundle Planner</title>
+<link rel="icon" type="image/jpeg" href="images/8ac7af4e-af87-4d08-bcc4-0b827c78cb1b.jfif">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#12263a;--bg:#f2f5f8;--card:#fff;--line:#d9e0e7;--muted:#5b6b7a;--teal:#0e7c7b;--tealtx:#fff;--tag:#ffd84a;--tagtx:#12263a;--red:#c8312a}
+@media (prefers-color-scheme:dark){:root{--ink:#e8eef4;--bg:#0f1b27;--card:#172636;--line:#2a3d50;--muted:#93a4b5;--teal:#2bb3b1;--tealtx:#07222a;--tag:#ffd84a;--tagtx:#12263a;--red:#ff7b72}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3,.price{font-family:"Bricolage Grotesque",system-ui,sans-serif;letter-spacing:-.01em}
+header{padding:20px 20px 4px;max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:16px}
+header h1{margin:0;line-height:0;flex:none}
+.logo{display:block;width:96px;height:96px;border-radius:12%}
+header p{margin:0;flex:1 1 0;min-width:0;color:var(--muted)}
+main{max-width:1120px;margin:0 auto;padding:16px 20px 48px;display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start}
+@media (max-width:860px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+h2{margin:0 0 12px;font-size:1.2rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.prod{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.prod .em{font-size:1.8rem}
+.prod b{font-weight:600}
+.prod .meta{color:var(--muted);font-size:.85rem}
+.price{font-weight:700;font-size:1.15rem}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px}
+button:hover{border-color:var(--teal)}
+button.primary{background:var(--teal);color:var(--tealtx);border-color:var(--teal);font-weight:600}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--tag);outline-offset:1px}
+.prod button{margin-top:auto}
+input,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%}
+label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:3px}
+.side{position:sticky;top:12px;display:flex;flex-direction:column;gap:16px}
+@media (max-width:860px){.side{position:static}}
+.items{list-style:none;margin:0 0 12px;padding:0}
+.items li{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{padding:2px 9px}
+.empty{color:var(--muted);padding:8px 0 14px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.sum{display:flex;justify-content:space-between;padding:3px 0}
+.sum.save{color:var(--red)}
+.tag{margin-top:12px;background:var(--tag);color:var(--tagtx);border-radius:10px 10px 10px 28px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:8px;border:2px dashed rgba(18,38,58,.5)}
+.tag small{display:block;font-size:.85rem;font-weight:500}
+.tag .price{font-size:2.1rem;font-weight:800;line-height:1}
+.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.saved{list-style:none;margin:0;padding:0}
+.saved li{padding:8px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;align-items:center}
+.saved small{color:var(--muted);display:block}
+.msg{font-size:.85rem;color:var(--teal);min-height:1.2em;margin-top:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1><img class="logo" src="images/8ac7af4e-af87-4d08-bcc4-0b827c78cb1b.jfif" alt="Bundle Wise" width="96" height="96"></h1>
+  <p>Pick products, build a bundle, set a discount, and see the final price. <a href="admin.html" style="color:var(--teal);font-weight:600">Admin</a></p>
+</header>
+<main>
+  <section class="card" aria-labelledby="ph">
+    <h2 id="ph">Products</h2>
+    <div class="grid" id="products"></div>
+  </section>
+
+  <div class="side">
+    <section class="card" aria-labelledby="bh">
+      <h2 id="bh">Your bundle</h2>
+      <label for="bn">Bundle name</label>
+      <input id="bn" placeholder="e.g. Back-to-school pack" style="margin-bottom:12px">
+      <ul class="items" id="items"></ul>
+
+      <div class="row">
+        <div><label for="dt">Discount type</label>
+          <select id="dt"><option value="percent">Percent (%)</option><option value="fixed">Fixed amount</option></select></div>
+        <div><label for="dv">Discount</label><input id="dv" type="number" min="0" step="0.01" value="0"></div>
+      </div>
+      <div class="actions" id="presets" aria-label="Quick discounts"></div>
+
+      <div style="margin-top:14px">
+        <div class="sum"><span>Items</span><span id="sCount">0</span></div>
+        <div class="sum"><span>Subtotal</span><span id="sSub">0.00</span></div>
+        <div class="sum save"><span>Discount</span><span id="sDisc">-0.00</span></div>
+      </div>
+      <div class="tag">
+        <div><small>Final bundle price</small><small id="sSave"></small></div>
+        <div class="price" id="sFinal">0.00</div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="save">Save bundle</button>
+        <button id="copy">Copy summary</button>
+        <button id="clear">Clear</button>
+      </div>
+      <div class="msg" id="msg" role="status"></div>
+    </section>
+
+    <section class="card" aria-labelledby="sh">
+      <h2 id="sh">Saved bundles</h2>
+      <ul class="saved" id="saved"></ul>
+    </section>
+  </div>
+</main>
+
+<script>
+const CUR = "₱"; // change to "$", "€", etc.
+const fmt = n => CUR + n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $ = id => document.getElementById(id);
+
+const SEED = [
+  {id:1,name:"Notebook",price:45,stock:30,em:"📓"},
+  {id:2,name:"Ballpen set",price:60,stock:25,em:"🖊️"},
+  {id:3,name:"Backpack",price:850,stock:8,em:"🎒"},
+  {id:4,name:"Water bottle",price:220,stock:12,em:"🧴"},
+  {id:5,name:"Lunch box",price:180,stock:10,em:"🍱"},
+  {id:6,name:"Calculator",price:320,stock:6,em:"🧮"}
+];
+const load = (k,d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } };
+const store = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+
+let products = load("bw_products", SEED);
+let saved = load("bw_saved", []);
+let bundle = {};            // productId -> qty
+let discount = {type:"percent", value:0};
+
+function totals(){
+  let sub = 0, count = 0;
+  for (const p of products){ const q = bundle[p.id]||0; sub += q*p.price; count += q; }
+  let d = discount.type==="percent" ? sub*Math.min(Math.max(discount.value,0),100)/100 : Math.min(Math.max(discount.value,0),sub);
+  return {sub, count, disc:d, final:sub-d};
+}
+function lines(){ return products.filter(p=>bundle[p.id]).map(p=>({name:p.name,qty:bundle[p.id],price:p.price})); }
+function discLabel(){ return discount.type==="percent" ? discount.value+"% off" : fmt(discount.value)+" off"; }
+
+function renderProducts(){
+  $("products").innerHTML = products.map(p=>{
+    const q = bundle[p.id]||0, left = p.stock-q;
+    return `<div class="prod"><span class="em" aria-hidden="true">${p.em||"📦"}</span><b>${esc(p.name)}</b>
+      <span class="price">${fmt(p.price)}</span>
+      <span class="meta">${left>0 ? left+" in stock" : "Out of stock"}</span>
+      <button data-add="${p.id}" ${left<=0?"disabled":""}>Add to bundle</button></div>`;
+  }).join("") || '<p class="empty">No products yet. Add one above.</p>';
+}
+function renderBundle(){
+  const ls = products.filter(p=>bundle[p.id]);
+  $("items").innerHTML = ls.length ? ls.map(p=>`<li><span>${esc(p.name)}<br><small style="color:var(--muted)">${fmt(p.price)} each</small></span>
+    <span class="qty"><button data-dec="${p.id}" aria-label="Remove one ${esc(p.name)}">−</button><span>${bundle[p.id]}</span>
+    <button data-inc="${p.id}" aria-label="Add one ${esc(p.name)}" ${bundle[p.id]>=p.stock?"disabled":""}>+</button></span>
+    <b>${fmt(bundle[p.id]*p.price)}</b></li>`).join("")
+    : '<li class="empty" style="display:block">Your bundle is empty. Add products from the list.</li>';
+  const t = totals();
+  $("sCount").textContent = t.count;
+  $("sSub").textContent = fmt(t.sub);
+  $("sDisc").textContent = "-" + fmt(t.disc);
+  $("sFinal").textContent = fmt(t.final);
+  $("sSave").textContent = t.disc>0 ? "You save " + fmt(t.disc) : "";
+}
+function renderSaved(){
+  $("saved").innerHTML = saved.length ? saved.map((b,i)=>`<li><div><b>${esc(b.name)}</b>
+    <small>${b.count} items · ${esc(b.disc)} · ${fmt(b.final)}</small></div>
+    <button data-del="${i}" aria-label="Delete ${esc(b.name)}">Delete</button></li>`).join("")
+    : '<li class="empty">Saved bundles will show up here.</li>';
+}
+function renderAll(){ renderProducts(); renderBundle(); renderSaved(); }
+function note(t){ $("msg").textContent = t; setTimeout(()=>{ if($("msg").textContent===t) $("msg").textContent=""; },2500); }
+
+document.addEventListener("click", e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  const d = b.dataset;
+  if (d.add || d.inc){ const id=+(d.add||d.inc), p=products.find(x=>x.id===id); if((bundle[id]||0)<p.stock) bundle[id]=(bundle[id]||0)+1; renderProducts(); renderBundle(); }
+  else if (d.dec){ const id=+d.dec; bundle[id]=(bundle[id]||0)-1; if(bundle[id]<=0) delete bundle[id]; renderProducts(); renderBundle(); }
+  else if (d.del){ saved.splice(+d.del,1); store("bw_saved",saved); renderSaved(); }
+  else if (d.preset){ discount={type:"percent",value:+d.preset}; $("dt").value="percent"; $("dv").value=d.preset; renderBundle(); }
+});
+
+$("presets").innerHTML = [5,10,15,20].map(n=>`<button data-preset="${n}">${n}% off</button>`).join("");
+$("dt").onchange = $("dv").oninput = () => { discount={type:$("dt").value,value:parseFloat($("dv").value)||0}; renderBundle(); };
+
+$("clear").onclick = () => { bundle={}; $("bn").value=""; renderAll(); };
+$("save").onclick = () => {
+  const t=totals(); if(!t.count){ note("Add at least one product first."); return; }
+  saved.unshift({name:$("bn").value.trim()||"Untitled bundle",count:t.count,disc:discLabel(),final:t.final,items:lines()});
+  store("bw_saved",saved); renderSaved(); note("Bundle saved.");
+};
+$("copy").onclick = async () => {
+  const t=totals(); if(!t.count){ note("Add at least one product first."); return; }
+  const txt = ($("bn").value.trim()||"Bundle") + "\n" + lines().map(l=>`${l.qty} x ${l.name} @ ${fmt(l.price)}`).join("\n")
+    + `\nSubtotal: ${fmt(t.sub)}\nDiscount (${discLabel()}): -${fmt(t.disc)}\nFinal price: ${fmt(t.final)}`;
+  try { await navigator.clipboard.writeText(txt); note("Summary copied."); } catch(e){ note("Copy is not available in this browser."); }
+};
+
+window.addEventListener("storage", e=>{
+  if (e.key==="bw_products"){ products = load("bw_products", SEED); for (const id in bundle){ const p = products.find(x=>x.id==id); if(!p) delete bundle[id]; else bundle[id]=Math.min(bundle[id],p.stock); if(bundle[id]<=0) delete bundle[id]; } renderAll(); }
+});
+renderAll();
+</script>
+</body>
+</html>
